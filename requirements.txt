@@ -7,3 +7,4 @@ pylint==3.2.3
 pytest==8.2.2
 pytest-mock==3.14.0
 pytest-asyncio==0.23.7
+sqlmodel==0.0.19

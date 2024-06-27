@@ -2,17 +2,19 @@
 User models
 """
 
+from typing import Optional
 from datetime import datetime
 from uuid import UUID, uuid4
-from pydantic import AwareDatetime, BaseModel, Field
+from pydantic import AwareDatetime, BaseModel
+from sqlmodel import Field, SQLModel
 
 
-class User(BaseModel):
+class User(SQLModel, table=True):
     """
     User model
     """
 
-    id: UUID | None = Field(default_factory=uuid4)
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(min_length=3)
     signup_date: datetime = AwareDatetime()
 

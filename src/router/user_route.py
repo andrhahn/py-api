@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from src.model.user import User
 from src.service import user_service
 from src.model.user import CreateUserRequest
+from src.util import uuid_util
 
 
 async def get_users() -> [User]:
@@ -20,6 +21,9 @@ async def get_user_by_id(id_: str) -> User | None:
     """
     Get user by id
     """
+
+    if not uuid_util.is_valid_uuid(id_):
+        raise HTTPException(status_code=400, detail="Invalid user id")
 
     result = await user_service.retrieve_user_by_id(id_)
 

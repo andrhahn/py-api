@@ -3,7 +3,6 @@ Loan route tests
 """
 
 from uuid import uuid4
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 from pydantic import ValidationError
 from fastapi.exceptions import HTTPException
@@ -11,16 +10,16 @@ import pytest
 from callee import Attrs
 from src.model.loan import Loan, LoanSchedule, LoanSummary, CreateLoanRequest
 from src.router import loan_route
-from src.service import user_service
 
 
-now = datetime.now(timezone.utc)
+user1_id = uuid4()
+user2_id = uuid4()
 
 loans = [
-    Loan(uuid4(), user_service.users[0].id, [], 1000.00, 19.99, 36),
-    Loan(uuid4(), user_service.users[0].id, [], 750.00, 17.75, 30),
-    Loan(uuid4(), user_service.users[1].id, [], 500.00, 15.5, 24),
-    Loan(uuid4(), user_service.users[2].id, [], 20.00, 1.99, 6),
+    Loan(uuid4(), user1_id, 1000.00, 19.99, 36),
+    Loan(uuid4(), user1_id, 750.00, 17.75, 30),
+    Loan(uuid4(), user2_id, 500.00, 15.5, 24),
+    Loan(uuid4(), user2_id, 20.00, 1.99, 6),
 ]
 
 loans_schedules = [
@@ -64,7 +63,9 @@ def fixture_mock_get_loan_schedule(mocker):
     Get loan schedule mock fixture
     """
     async_mock = AsyncMock()
-    mocker.patch("src.service.loan_service.retrieve_loan_schedule", side_effect=async_mock)
+    mocker.patch(
+        "src.service.loan_service.retrieve_loan_schedule", side_effect=async_mock
+    )
     return async_mock
 
 
@@ -74,7 +75,9 @@ def fixture_mock_get_loan_summary(mocker):
     Get loan summary mock fixture
     """
     async_mock = AsyncMock()
-    mocker.patch("src.service.loan_service.retrieve_loan_summary", side_effect=async_mock)
+    mocker.patch(
+        "src.service.loan_service.retrieve_loan_summary", side_effect=async_mock
+    )
     return async_mock
 
 
@@ -168,7 +171,6 @@ async def test_get_loan_by_id_not_found(mock_get_loan_by_id):
         raise pytest.fail("Test failed due to error not being caught")
 
 
-
 @pytest.mark.asyncio
 async def test_get_loan_schedule(mock_get_loan_schedule):
     """
@@ -243,7 +245,6 @@ async def test_create_loan(mock_create_loan):
     result = await loan_route.create_loan(
         CreateLoanRequest(
             loans[1].user_id,
-            loans[1].shared_user_ids,
             loans[1].amount,
             loans[1].annual_interest_rate,
             loans[1].loan_term,
@@ -255,7 +256,6 @@ async def test_create_loan(mock_create_loan):
     mock_create_loan.assert_called_once_with(
         Attrs(
             user_id=loans[1].user_id,
-            shared_user_ids=loans[1].shared_user_ids,
             amount=loans[1].amount,
             annual_interest_rate=loans[1].annual_interest_rate,
             loan_term=loans[1].loan_term,
@@ -276,7 +276,6 @@ async def test_create_loan_missing_user_id(mock_create_loan):
         await loan_route.create_loan(
             CreateLoanRequest(
                 None,
-                loans[1].shared_user_ids,
                 loans[1].amount,
                 loans[1].annual_interest_rate,
                 loans[1].loan_term,
@@ -303,7 +302,6 @@ async def test_create_loan_invalid_amount(mock_create_loan):
         await loan_route.create_loan(
             CreateLoanRequest(
                 loans[1].user_id,
-                loans[1].shared_user_ids,
                 0,
                 loans[1].annual_interest_rate,
                 loans[1].loan_term,

@@ -3,28 +3,25 @@ Loan models
 """
 
 from uuid import UUID, uuid4
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import Optional
+from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
 
 
-class Loan(BaseModel):
+class Loan(SQLModel, table=True):
     """
     Loan model
     """
 
-    id: UUID | None = Field(default_factory=uuid4)
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID
-    shared_user_ids: Optional[List[UUID]] = None
     amount: float = Field(gt=0)
     annual_interest_rate: float = Field(gt=0)
     loan_term: int = Field(gt=0, le=60)
 
-    def __init__(
-        self, _id, user_id, shared_user_ids, amount, annual_interest_rate, loan_term
-    ):
+    def __init__(self, _id, user_id, amount, annual_interest_rate, loan_term):
         super().__init__(
             user_id=user_id,
-            shared_user_ids=shared_user_ids,
             amount=amount,
             annual_interest_rate=annual_interest_rate,
             loan_term=loan_term,
@@ -71,17 +68,13 @@ class CreateLoanRequest(BaseModel):
     """
 
     user_id: UUID = Field()
-    shared_user_ids: Optional[List[UUID]] = Field(min_length=0, max_length=10)
     amount: float = Field(gt=0)
     annual_interest_rate: float = Field(gt=0)
     loan_term: int = Field(gt=0, le=60)
 
-    def __init__(
-        self, user_id, shared_user_ids, amount, annual_interest_rate, loan_term
-    ):
+    def __init__(self, user_id, amount, annual_interest_rate, loan_term):
         super().__init__(
             user_id=user_id,
-            shared_user_ids=shared_user_ids,
             amount=amount,
             annual_interest_rate=annual_interest_rate,
             loan_term=loan_term,
