@@ -13,8 +13,8 @@ class UserLoan(SQLModel, table=True):
     """
 
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID
-    loan_id: UUID
+    user_id: UUID = Field(index=True, foreign_key="user.id")
+    loan_id: UUID = Field(index=True, foreign_key="loan.id")
     is_owner: bool
 
     def __init__(self, _id, user_id, loan_id, is_owner):

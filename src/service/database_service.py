@@ -21,7 +21,7 @@ def init(db_uri: str = None) -> None:
 
     SQLModel.metadata.create_all(ENGINE)
 
-    logger.info('Successfully connected to database: %s', db_uri)
+    logger.info("Successfully connected to database: %s", db_uri)
 
 
 def get_session() -> Session:

@@ -25,7 +25,7 @@ users = [
 @pytest.fixture(name="mock_retrieve_users")
 def fixture_mock_retrieve_users(mocker):
     """
-    Get users mock fixture
+    Retrieve users mock fixture
     """
     async_mock = AsyncMock()
     mocker.patch("src.service.user_service.retrieve_users", side_effect=async_mock)
@@ -35,7 +35,7 @@ def fixture_mock_retrieve_users(mocker):
 @pytest.fixture(name="mock_retrieve_user_by_id")
 def fixture_mock_retrieve_user_by_id(mocker):
     """
-    Get user by id mock fixture
+    Retrieve user by id mock fixture
     """
     async_mock = AsyncMock()
     mocker.patch("src.service.user_service.retrieve_user_by_id", side_effect=async_mock)

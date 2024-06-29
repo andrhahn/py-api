@@ -46,7 +46,7 @@ async def get_loan_by_id(id_: str) -> Loan | None:
 
 
 @router.get("/loans/{id_}/schedule")
-async def get_loan_schedule(id_: str) -> LoanSchedule | None:
+async def get_loan_schedule(id_: str) -> list[LoanSchedule]:
     """
     Get loan schedule
     """

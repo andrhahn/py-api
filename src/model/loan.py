@@ -31,8 +31,8 @@ class LoanSchedule(BaseModel):
     LoanSchedule model
     """
 
-    month: int = Field(gt=0, le=12)
-    remaining_balance: float = Field(gt=0)
+    month: int = Field(gt=0, le=60)
+    remaining_balance: float = Field(ge=0)
     monthly_payment: float = Field(gt=0)
 
     def __init__(self, _id, month, remaining_balance, monthly_payment):
