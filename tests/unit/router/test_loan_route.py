@@ -227,9 +227,9 @@ async def test_get_loan_summary(mock_retrieve_loan_summary):
     """
     mock_retrieve_loan_summary.return_value = loans_summaries[0]
 
-    result = await loan_route.get_loan_summary(str(loans[0].id))
+    result = await loan_route.get_loan_summary(str(loans[0].id), 5)
 
-    mock_retrieve_loan_summary.assert_called_with(str(loans[0].id))
+    mock_retrieve_loan_summary.assert_called_with(str(loans[0].id), 5)
 
     assert result == loans_summaries[0]
 
@@ -242,12 +242,30 @@ async def test_get_loan_summary_not_found(mock_retrieve_loan_summary):
     mock_retrieve_loan_summary.return_value = None
 
     try:
-        await loan_route.get_loan_summary(str(loans[0].id))
+        await loan_route.get_loan_summary(str(loans[0].id), 2)
     except HTTPException as e:
         assert e.status_code == 404
         assert e.detail == "Loan summary not found"
 
-        mock_retrieve_loan_summary.assert_called_with(str(loans[0].id))
+        mock_retrieve_loan_summary.assert_called_with(str(loans[0].id), 2)
+    else:
+        raise pytest.fail("Test failed due to error not being caught")
+
+
+@pytest.mark.asyncio
+async def test_get_loan_summary_invalid_month(mock_retrieve_loan_summary):
+    """
+    Get loan summary invalid month test
+    """
+    mock_retrieve_loan_summary.return_value = None
+
+    try:
+        await loan_route.get_loan_summary(str(loans[0].id), 13)
+    except HTTPException as e:
+        assert e.status_code == 400
+        assert e.detail == "Invalid month"
+
+        mock_retrieve_loan_summary.assert_not_called()
     else:
         raise pytest.fail("Test failed due to error not being caught")
 

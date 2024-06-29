@@ -18,8 +18,8 @@ Python API
     # start
     uvicorn src.main:app --reload
 
-    # docs
-    http://127.0.0.1:8000/docs
+    # create .env file with the following
+    DB_URI=sqlite://
 
     # test
     pytest tests
@@ -32,6 +32,9 @@ Python API
 
     # docker
     docker-compose up
+
+    # docs
+    http://127.0.0.1:8000/docs
 
 ### License
 

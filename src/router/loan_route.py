@@ -63,7 +63,7 @@ async def get_loan_schedule(id_: str) -> LoanSchedule | None:
 
 
 @router.get("/loans/{id_}/summary")
-async def get_loan_summary(id_: str) -> LoanSummary | None:
+async def get_loan_summary(id_: str, month: int) -> LoanSummary | None:
     """
     Get loan summary
     """
@@ -71,7 +71,10 @@ async def get_loan_summary(id_: str) -> LoanSummary | None:
     if not uuid_util.is_valid_uuid(id_):
         raise HTTPException(status_code=400, detail="Invalid loan id")
 
-    result = await loan_service.retrieve_loan_summary(id_)
+    if not 1 <= month <= 12:
+        raise HTTPException(status_code=400, detail="Invalid month")
+
+    result = await loan_service.retrieve_loan_summary(id_, month)
 
     if not result:
         raise HTTPException(status_code=404, detail="Loan summary not found")

@@ -39,21 +39,17 @@ async def retrieve_loan_schedule(id_: str) -> LoanSchedule | None:
     Retrieve loan schedule
     """
 
-    if id_:
-        print("Placeholder...")
-
-    return None  # TODO...
+    return LoanSchedule(id_, 5, 100, 100)
 
 
-async def retrieve_loan_summary(id_: str) -> LoanSummary | None:
+async def retrieve_loan_summary(id_: str, month: int) -> LoanSummary | None:
     """
     Retrieve loan summary
     """
 
-    if id_:
-        print("Placeholder...")
+    print(month)
 
-    return None  # TODO...
+    return LoanSummary(id_, 100, 200, 100)
 
 
 async def create_loan(loan: Loan, user_id) -> Loan | None:
