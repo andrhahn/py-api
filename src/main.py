@@ -2,13 +2,19 @@
 Main
 """
 
+import logging as logger
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from src.router import user_route
 from src.router import loan_route
 from src.service import database_service
 
+load_dotenv()
 
-database_service.init()
+logger.getLogger().setLevel(logger.INFO)
+
+database_service.init(os.getenv("DB_URI"))
 
 app = FastAPI()
 

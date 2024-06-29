@@ -19,7 +19,7 @@ Python API
     uvicorn src.main:app --reload
 
     # create .env file with the following
-    DB_URI=sqlite://
+    DB_URI=sqlite:///database.db
 
     # test
     pytest tests
