@@ -3,7 +3,6 @@ Loan repository tests
 """
 
 from uuid import uuid4
-from sqlmodel import SQLModel
 import pytest
 from src.model.loan import Loan
 from src.repository import loan_repository
@@ -16,9 +15,7 @@ def fixture_loans():
     Loans mock fixture
     """
 
-    print("setup")
-
-    SQLModel.metadata.create_all(database_service.engine)
+    database_service.init()
 
     loans = [
         loan_repository.create(Loan(uuid4(), 1000.00, 19.99, 36)),
@@ -28,10 +25,6 @@ def fixture_loans():
     ]
 
     yield loans
-
-    print("teardown")
-
-    SQLModel.metadata.drop_all(database_service.engine)
 
 
 @pytest.mark.asyncio

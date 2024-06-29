@@ -4,7 +4,6 @@ User repository tests
 
 from uuid import uuid4
 from datetime import datetime, timezone
-from sqlmodel import SQLModel
 import pytest
 from src.model.user import User
 from src.repository import user_repository
@@ -17,9 +16,7 @@ def fixture_users():
     Users mock fixture
     """
 
-    print("setup")
-
-    SQLModel.metadata.create_all(database_service.engine)
+    database_service.init()
 
     now = datetime.now(timezone.utc)
 
@@ -30,10 +27,6 @@ def fixture_users():
     ]
 
     yield users
-
-    print("teardown")
-
-    SQLModel.metadata.drop_all(database_service.engine)
 
 
 @pytest.mark.asyncio

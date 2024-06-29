@@ -2,14 +2,26 @@
 Database service
 """
 
+import logging
 from sqlmodel import Session, SQLModel, create_engine
-from src.model import user, loan, user_loan # pylint: disable=unused-import
+from src.model import user, loan, user_loan  # pylint: disable=unused-import
 
-engine = create_engine("sqlite://", echo=True)
 
-SQLModel.metadata.create_all(engine)
+ENGINE = None
 
-print("Successfully connected to database")
+
+def init() -> None:
+    """
+    Initialize database
+    """
+
+    global ENGINE  # pylint: disable=global-statement
+
+    ENGINE = create_engine("sqlite://", echo=True)
+
+    SQLModel.metadata.create_all(ENGINE)
+
+    logging.info("Successfully connected to database")
 
 
 def get_session() -> Session:
@@ -17,6 +29,6 @@ def get_session() -> Session:
     Get database session
     """
 
-    print("Creating database session")
+    logging.info("Creating database session")
 
-    return Session(engine)
+    return Session(ENGINE)

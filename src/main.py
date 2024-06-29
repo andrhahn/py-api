@@ -5,6 +5,10 @@ Main
 from fastapi import FastAPI
 from src.router import user_route
 from src.router import loan_route
+from src.service import database_service
+
+
+database_service.init()
 
 app = FastAPI()
 
