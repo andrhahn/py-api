@@ -2,7 +2,7 @@
 Loan repository
 """
 
-from sqlmodel import select
+from sqlmodel import select, col
 from src.service import database_service
 from src.model.loan import Loan
 
@@ -29,13 +29,17 @@ def find_one(id_: str) -> Loan | None:
         return session.get(Loan, id_)
 
 
-def find_one_by_user_id(user_id: str) -> Loan | None:
+def find_by_ids(ids: [str]) -> [Loan]:
     """
-    Retrieve loan by user id
+    Retrieve loans by ids
     """
 
     with database_service.get_session() as session:
-        return session.get(Loan, user_id)
+        statement = select(Loan).where(col(Loan.id).in_(ids))
+
+        results = session.exec(statement)
+
+        return results.all()
 
 
 def create(loan: Loan) -> Loan:

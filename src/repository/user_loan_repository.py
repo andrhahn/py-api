@@ -29,13 +29,17 @@ def find_one(id_: str) -> UserLoan | None:
         return session.get(UserLoan, id_)
 
 
-def find_one_by_user_id(user_id: str) -> UserLoan | None:
+def find_by_user_id(user_id: str) -> [UserLoan]:
     """
-    Retrieve user loan by user id
+    Retrieve all user loans by user id
     """
 
     with database_service.get_session() as session:
-        return session.get(UserLoan, user_id)
+        statement = select(UserLoan).where(UserLoan.user_id == user_id)
+
+        results = session.exec(statement)
+
+        return results.all()
 
 
 def create(user_loan: UserLoan) -> UserLoan:

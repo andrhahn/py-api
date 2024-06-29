@@ -14,8 +14,8 @@ from src.service import database_service
 @pytest.fixture(autouse=True, name="users")
 def fixture_users():
     """
-   Users mock fixture
-   """
+    Users mock fixture
+    """
 
     print("setup")
 
@@ -37,9 +37,9 @@ def fixture_users():
 
 
 @pytest.mark.asyncio
-async def test_get_users(users):
+async def test_find(users):
     """
-    Get users test
+    Find test
     """
 
     result = user_repository.find()
@@ -48,9 +48,9 @@ async def test_get_users(users):
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id(users):
+async def test_find_one(users):
     """
-    Get user by id test
+    Find one test
     """
 
     result = user_repository.find_one(str(users[0].id))
@@ -59,9 +59,9 @@ async def test_get_user_by_id(users):
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id_not_found():
+async def test_find_one_not_found():
     """
-    Get user by id not found test
+    Find one not found test
     """
 
     result = user_repository.find_one(str(uuid4()))

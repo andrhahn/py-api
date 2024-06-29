@@ -14,14 +14,12 @@ class Loan(SQLModel, table=True):
     """
 
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID
     amount: float = Field(gt=0)
     annual_interest_rate: float = Field(gt=0)
     loan_term: int = Field(gt=0, le=60)
 
-    def __init__(self, _id, user_id, amount, annual_interest_rate, loan_term):
+    def __init__(self, _id, amount, annual_interest_rate, loan_term):
         super().__init__(
-            user_id=user_id,
             amount=amount,
             annual_interest_rate=annual_interest_rate,
             loan_term=loan_term,
@@ -78,4 +76,19 @@ class CreateLoanRequest(BaseModel):
             amount=amount,
             annual_interest_rate=annual_interest_rate,
             loan_term=loan_term,
+        )
+
+
+class ShareLoanRequest(BaseModel):
+    """
+    ShareLoanRequest model
+    """
+
+    loan_id: UUID = Field()
+    user_id: UUID = Field()
+
+    def __init__(self, loan_id, user_id):
+        super().__init__(
+            loan_id=loan_id,
+            user_id=user_id,
         )

@@ -21,10 +21,10 @@ def fixture_loans():
     SQLModel.metadata.create_all(database_service.engine)
 
     loans = [
-        loan_repository.create(Loan(uuid4(), uuid4(), 1000.00, 19.99, 36)),
-        loan_repository.create(Loan(uuid4(), uuid4(), 750.00, 17.75, 30)),
-        loan_repository.create(Loan(uuid4(), uuid4(), 500.00, 15.5, 24)),
-        loan_repository.create(Loan(uuid4(), uuid4(), 20.00, 1.99, 6)),
+        loan_repository.create(Loan(uuid4(), 1000.00, 19.99, 36)),
+        loan_repository.create(Loan(uuid4(), 750.00, 17.75, 30)),
+        loan_repository.create(Loan(uuid4(), 500.00, 15.5, 24)),
+        loan_repository.create(Loan(uuid4(), 20.00, 1.99, 6)),
     ]
 
     yield loans
@@ -35,9 +35,9 @@ def fixture_loans():
 
 
 @pytest.mark.asyncio
-async def test_get_loans(loans):
+async def test_find(loans):
     """
-    Get loans test
+    Find test
     """
 
     result = loan_repository.find()
@@ -46,9 +46,9 @@ async def test_get_loans(loans):
 
 
 @pytest.mark.asyncio
-async def test_get_loan_by_id(loans):
+async def test_find_one(loans):
     """
-    Get loan by id test
+    Find one test
     """
 
     result = loan_repository.find_one(str(loans[0].id))
@@ -57,9 +57,9 @@ async def test_get_loan_by_id(loans):
 
 
 @pytest.mark.asyncio
-async def test_get_loan_by_id_not_found():
+async def test_find_one_not_found():
     """
-    Get loan by id not found test
+    Find one not found test
     """
 
     result = loan_repository.find_one(str(uuid4()))
@@ -68,12 +68,34 @@ async def test_get_loan_by_id_not_found():
 
 
 @pytest.mark.asyncio
+async def test_find_by_ids(loans):
+    """
+    Find by ids test
+    """
+
+    result = loan_repository.find_by_ids([loans[0].id, loans[1].id])
+
+    assert len(result) == 2
+
+
+@pytest.mark.asyncio
+async def test_find_one_by_user_ids_not_found():
+    """
+    Find by ids not found test
+    """
+
+    result = loan_repository.find_by_ids([uuid4(), uuid4()])
+
+    assert result == []
+
+
+@pytest.mark.asyncio
 async def test_create_loan():
     """
     Create loan test
     """
 
-    loan = Loan(uuid4(), uuid4(), 50.00, 19.99, 36)
+    loan = Loan(uuid4(), 50.00, 19.99, 36)
 
     result = loan_repository.create(loan)
 

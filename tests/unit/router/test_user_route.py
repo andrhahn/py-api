@@ -22,8 +22,8 @@ users = [
 ]
 
 
-@pytest.fixture(name="mock_get_users")
-def fixture_mock_get_users(mocker):
+@pytest.fixture(name="mock_retrieve_users")
+def fixture_mock_retrieve_users(mocker):
     """
     Get users mock fixture
     """
@@ -32,8 +32,8 @@ def fixture_mock_get_users(mocker):
     return async_mock
 
 
-@pytest.fixture(name="mock_get_user_by_id")
-def fixture_mock_get_user_by_id(mocker):
+@pytest.fixture(name="mock_retrieve_user_by_id")
+def fixture_mock_retrieve_user_by_id(mocker):
     """
     Get user by id mock fixture
     """
@@ -53,11 +53,11 @@ def fixture_mock_create_user(mocker):
 
 
 @pytest.mark.asyncio
-async def test_get_users(mock_get_users):
+async def test_get_users(mock_retrieve_users):
     """
     Get users test
     """
-    mock_get_users.return_value = users
+    mock_retrieve_users.return_value = users
 
     result = await user_route.get_users()
 
@@ -65,11 +65,11 @@ async def test_get_users(mock_get_users):
 
 
 @pytest.mark.asyncio
-async def test_get_users_not_found(mock_get_users):
+async def test_get_users_not_found(mock_retrieve_users):
     """
     Get users not found test
     """
-    mock_get_users.return_value = []
+    mock_retrieve_users.return_value = []
 
     result = await user_route.get_users()
 
@@ -77,25 +77,25 @@ async def test_get_users_not_found(mock_get_users):
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id(mock_get_user_by_id):
+async def test_get_user_by_id(mock_retrieve_user_by_id):
     """
     Get user by id test
     """
-    mock_get_user_by_id.return_value = users[0]
+    mock_retrieve_user_by_id.return_value = users[0]
 
     result = await user_route.get_user_by_id(str(users[0].id))
 
-    mock_get_user_by_id.assert_called_with(str(users[0].id))
+    mock_retrieve_user_by_id.assert_called_with(str(users[0].id))
 
     assert result == users[0]
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id_not_found(mock_get_user_by_id):
+async def test_get_user_by_id_not_found(mock_retrieve_user_by_id):
     """
     Get user by id not found test
     """
-    mock_get_user_by_id.return_value = None
+    mock_retrieve_user_by_id.return_value = None
 
     try:
         await user_route.get_user_by_id(str(users[0].id))
@@ -103,7 +103,7 @@ async def test_get_user_by_id_not_found(mock_get_user_by_id):
         assert e.status_code == 404
         assert e.detail == "User not found"
 
-        mock_get_user_by_id.assert_called_with(str(users[0].id))
+        mock_retrieve_user_by_id.assert_called_with(str(users[0].id))
     else:
         raise pytest.fail("Test failed due to error not being caught")
 

@@ -4,14 +4,26 @@ Loan service
 
 from src.model.loan import Loan, LoanSchedule, LoanSummary
 from src.repository import loan_repository
+from src.service import user_loan_service
+from src.model.user_loan import UserLoan
 
 
-async def retrieve_loans(user_id: str) -> [Loan]:
+async def retrieve_loans() -> [Loan]:
     """
-    Retrieve all loans, optional user_id param
+    Retrieve all loans
     """
 
-    return loan_repository.find_one_by_user_id(user_id)
+    return loan_repository.find()
+
+
+async def retrieve_loans_by_user_id(user_id: str) -> [Loan]:
+    """
+    Retrieve all loans by user id
+    """
+
+    user_loans = await user_loan_service.retrieve_user_loans_by_user_id(user_id)
+
+    return loan_repository.find_by_ids([user_loan.loan_id for user_loan in user_loans])
 
 
 async def retrieve_loan_by_id(id_: str) -> Loan | None:
@@ -44,9 +56,23 @@ async def retrieve_loan_summary(id_: str) -> LoanSummary | None:
     return None  # TODO...
 
 
-async def create_loan(loan: Loan) -> Loan | None:
+async def create_loan(loan: Loan, user_id) -> Loan | None:
     """
     Create loan
     """
 
-    return loan_repository.create(loan)
+    loan = loan_repository.create(loan)
+
+    await user_loan_service.create_user_loan(UserLoan(None, user_id, loan.id, True))
+
+    return loan
+
+
+async def share_loan(user_id, loan_id) -> Loan | None:
+    """
+    Share loan
+    """
+
+    await user_loan_service.create_user_loan(UserLoan(None, user_id, loan_id, False))
+
+    return await retrieve_loan_by_id(loan_id)

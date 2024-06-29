@@ -2,25 +2,33 @@
 Loan route
 """
 
-from fastapi import HTTPException
+from typing import Optional
+from fastapi import HTTPException, APIRouter
 from src.model.loan import Loan, LoanSchedule, LoanSummary
 from src.service import loan_service
 from src.util import uuid_util
+from src.model.loan import CreateLoanRequest, ShareLoanRequest
 
-from src.model.loan import CreateLoanRequest
+
+router = APIRouter()
 
 
-async def get_loans(user_id: str | None) -> [Loan]:
+@router.get("/loans")
+async def get_loans(user_id: Optional[str] = None) -> list[Loan]:
     """
     Get all loans
     """
 
-    if user_id and not uuid_util.is_valid_uuid(user_id):
-        raise HTTPException(status_code=400, detail="Invalid user id")
+    if user_id:
+        if not uuid_util.is_valid_uuid(user_id):
+            raise HTTPException(status_code=400, detail="Invalid user id")
 
-    return await loan_service.retrieve_loans(user_id)
+        return await loan_service.retrieve_loans_by_user_id(user_id)
+
+    return await loan_service.retrieve_loans()
 
 
+@router.get("/loans/{id_}")
 async def get_loan_by_id(id_: str) -> Loan | None:
     """
     Get loan by id
@@ -37,6 +45,7 @@ async def get_loan_by_id(id_: str) -> Loan | None:
     return result
 
 
+@router.get("/loans/{id_}/schedule")
 async def get_loan_schedule(id_: str) -> LoanSchedule | None:
     """
     Get loan schedule
@@ -53,6 +62,7 @@ async def get_loan_schedule(id_: str) -> LoanSchedule | None:
     return result
 
 
+@router.get("/loans/{id_}/summary")
 async def get_loan_summary(id_: str) -> LoanSummary | None:
     """
     Get loan summary
@@ -69,6 +79,7 @@ async def get_loan_summary(id_: str) -> LoanSummary | None:
     return result
 
 
+@router.post("/loans")
 async def create_loan(create_loan_request: CreateLoanRequest) -> Loan | None:
     """
     Create loan
@@ -76,10 +87,20 @@ async def create_loan(create_loan_request: CreateLoanRequest) -> Loan | None:
 
     loan = Loan(
         None,
-        create_loan_request.user_id,
         create_loan_request.amount,
         create_loan_request.annual_interest_rate,
         create_loan_request.loan_term,
     )
 
-    return await loan_service.create_loan(loan)
+    return await loan_service.create_loan(loan, create_loan_request.user_id)
+
+
+@router.post("/loans/share")
+async def share_loan(share_loan_request: ShareLoanRequest) -> Loan | None:
+    """
+    Share loan
+    """
+
+    return await loan_service.share_loan(
+        share_loan_request.user_id, share_loan_request.loan_id
+    )

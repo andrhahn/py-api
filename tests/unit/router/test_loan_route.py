@@ -12,14 +12,11 @@ from src.model.loan import Loan, LoanSchedule, LoanSummary, CreateLoanRequest
 from src.router import loan_route
 
 
-user1_id = uuid4()
-user2_id = uuid4()
-
 loans = [
-    Loan(uuid4(), user1_id, 1000.00, 19.99, 36),
-    Loan(uuid4(), user1_id, 750.00, 17.75, 30),
-    Loan(uuid4(), user2_id, 500.00, 15.5, 24),
-    Loan(uuid4(), user2_id, 20.00, 1.99, 6),
+    Loan(uuid4(), 1000.00, 19.99, 36),
+    Loan(uuid4(), 750.00, 17.75, 30),
+    Loan(uuid4(), 500.00, 15.5, 24),
+    Loan(uuid4(), 20.00, 1.99, 6),
 ]
 
 loans_schedules = [
@@ -37,8 +34,8 @@ loans_summaries = [
 ]
 
 
-@pytest.fixture(name="mock_get_loans")
-def fixture_mock_get_loans(mocker):
+@pytest.fixture(name="mock_retrieve_loans")
+def fixture_mock_retrieve_loans(mocker):
     """
     Get loans mock fixture
     """
@@ -47,8 +44,20 @@ def fixture_mock_get_loans(mocker):
     return async_mock
 
 
-@pytest.fixture(name="mock_get_loan_by_id")
-def fixture_mock_get_loan_by_id(mocker):
+@pytest.fixture(name="mock_retrieve_loans_by_user_id")
+def fixture_mock_retrieve_loans_by_user_id(mocker):
+    """
+    Get loans mock fixture
+    """
+    async_mock = AsyncMock()
+    mocker.patch(
+        "src.service.loan_service.retrieve_loans_by_user_id", side_effect=async_mock
+    )
+    return async_mock
+
+
+@pytest.fixture(name="mock_retrieve_loan_by_id")
+def fixture_mock_retrieve_loan_by_id(mocker):
     """
     Get loan by id mock fixture
     """
@@ -57,8 +66,8 @@ def fixture_mock_get_loan_by_id(mocker):
     return async_mock
 
 
-@pytest.fixture(name="mock_get_loan_schedule")
-def fixture_mock_get_loan_schedule(mocker):
+@pytest.fixture(name="mock_retrieve_loan_schedule")
+def fixture_mock_retrieve_loan_schedule(mocker):
     """
     Get loan schedule mock fixture
     """
@@ -69,8 +78,8 @@ def fixture_mock_get_loan_schedule(mocker):
     return async_mock
 
 
-@pytest.fixture(name="mock_get_loan_summary")
-def fixture_mock_get_loan_summary(mocker):
+@pytest.fixture(name="mock_retrieve_loan_summary")
+def fixture_mock_retrieve_loan_summary(mocker):
     """
     Get loan summary mock fixture
     """
@@ -92,11 +101,11 @@ def fixture_mock_create_loan(mocker):
 
 
 @pytest.mark.asyncio
-async def test_get_loans(mock_get_loans):
+async def test_get_loans(mock_retrieve_loans):
     """
     Get loans test
     """
-    mock_get_loans.return_value = loans
+    mock_retrieve_loans.return_value = loans
 
     result = await loan_route.get_loans("")
 
@@ -104,11 +113,11 @@ async def test_get_loans(mock_get_loans):
 
 
 @pytest.mark.asyncio
-async def test_get_loans_not_found(mock_get_loans):
+async def test_get_loans_not_found(mock_retrieve_loans):
     """
     Get loans not found test
     """
-    mock_get_loans.return_value = []
+    mock_retrieve_loans.return_value = []
 
     result = await loan_route.get_loans("")
 
@@ -116,49 +125,57 @@ async def test_get_loans_not_found(mock_get_loans):
 
 
 @pytest.mark.asyncio
-async def test_get_loans_by_user_id(mock_get_loans):
+async def test_get_loans_by_user_id(mock_retrieve_loans_by_user_id):
     """
     Get loans by user id test
     """
-    mock_get_loans.return_value = loans
+    mock_retrieve_loans_by_user_id.return_value = loans
 
-    result = await loan_route.get_loans(str(loans[0].user_id))
+    user_id = uuid4()
+
+    result = await loan_route.get_loans(str(user_id))
+
+    mock_retrieve_loans_by_user_id.assert_called_with(str(user_id))
 
     assert result == loans
 
 
 @pytest.mark.asyncio
-async def test_get_loans_by_user_id_not_found(mock_get_loans):
+async def test_get_loans_by_user_id_not_found(mock_retrieve_loans_by_user_id):
     """
     Get loans by user id not found test
     """
-    mock_get_loans.return_value = []
+    mock_retrieve_loans_by_user_id.return_value = []
 
-    result = await loan_route.get_loans(str(loans[0].user_id))
+    user_id = uuid4()
+
+    result = await loan_route.get_loans(str(user_id))
+
+    mock_retrieve_loans_by_user_id.assert_called_with(str(user_id))
 
     assert result == []
 
 
 @pytest.mark.asyncio
-async def test_get_loan_by_id(mock_get_loan_by_id):
+async def test_get_loan_by_id(mock_retrieve_loan_by_id):
     """
     Get loan by id test
     """
-    mock_get_loan_by_id.return_value = loans[0]
+    mock_retrieve_loan_by_id.return_value = loans[0]
 
     result = await loan_route.get_loan_by_id(str(loans[0].id))
 
-    mock_get_loan_by_id.assert_called_with(str(loans[0].id))
+    mock_retrieve_loan_by_id.assert_called_with(str(loans[0].id))
 
     assert result == loans[0]
 
 
 @pytest.mark.asyncio
-async def test_get_loan_by_id_not_found(mock_get_loan_by_id):
+async def test_get_loan_by_id_not_found(mock_retrieve_loan_by_id):
     """
     Get loan by id not found test
     """
-    mock_get_loan_by_id.return_value = None
+    mock_retrieve_loan_by_id.return_value = None
 
     try:
         await loan_route.get_loan_by_id(str(loans[0].id))
@@ -166,31 +183,31 @@ async def test_get_loan_by_id_not_found(mock_get_loan_by_id):
         assert e.status_code == 404
         assert e.detail == "Loan not found"
 
-        mock_get_loan_by_id.assert_called_with(str(loans[0].id))
+        mock_retrieve_loan_by_id.assert_called_with(str(loans[0].id))
     else:
         raise pytest.fail("Test failed due to error not being caught")
 
 
 @pytest.mark.asyncio
-async def test_get_loan_schedule(mock_get_loan_schedule):
+async def test_get_loan_schedule(mock_retrieve_loan_schedule):
     """
     Get loan schedule test
     """
-    mock_get_loan_schedule.return_value = loans_schedules[0]
+    mock_retrieve_loan_schedule.return_value = loans_schedules[0]
 
     result = await loan_route.get_loan_schedule(str(loans[0].id))
 
-    mock_get_loan_schedule.assert_called_with(str(loans[0].id))
+    mock_retrieve_loan_schedule.assert_called_with(str(loans[0].id))
 
     assert result == loans_schedules[0]
 
 
 @pytest.mark.asyncio
-async def test_get_loan_schedule_not_found(mock_get_loan_schedule):
+async def test_get_loan_schedule_not_found(mock_retrieve_loan_schedule):
     """
     Get loan schedule not found test
     """
-    mock_get_loan_schedule.return_value = None
+    mock_retrieve_loan_schedule.return_value = None
 
     try:
         await loan_route.get_loan_schedule(str(loans[0].id))
@@ -198,31 +215,31 @@ async def test_get_loan_schedule_not_found(mock_get_loan_schedule):
         assert e.status_code == 404
         assert e.detail == "Loan schedule not found"
 
-        mock_get_loan_schedule.assert_called_with(str(loans[0].id))
+        mock_retrieve_loan_schedule.assert_called_with(str(loans[0].id))
     else:
         raise pytest.fail("Test failed due to error not being caught")
 
 
 @pytest.mark.asyncio
-async def test_get_loan_summary(mock_get_loan_summary):
+async def test_get_loan_summary(mock_retrieve_loan_summary):
     """
     Get loan summary test
     """
-    mock_get_loan_summary.return_value = loans_summaries[0]
+    mock_retrieve_loan_summary.return_value = loans_summaries[0]
 
     result = await loan_route.get_loan_summary(str(loans[0].id))
 
-    mock_get_loan_summary.assert_called_with(str(loans[0].id))
+    mock_retrieve_loan_summary.assert_called_with(str(loans[0].id))
 
     assert result == loans_summaries[0]
 
 
 @pytest.mark.asyncio
-async def test_get_loan_summary_not_found(mock_get_loan_summary):
+async def test_get_loan_summary_not_found(mock_retrieve_loan_summary):
     """
     Get loan summary not found test
     """
-    mock_get_loan_summary.return_value = None
+    mock_retrieve_loan_summary.return_value = None
 
     try:
         await loan_route.get_loan_summary(str(loans[0].id))
@@ -230,7 +247,7 @@ async def test_get_loan_summary_not_found(mock_get_loan_summary):
         assert e.status_code == 404
         assert e.detail == "Loan summary not found"
 
-        mock_get_loan_summary.assert_called_with(str(loans[0].id))
+        mock_retrieve_loan_summary.assert_called_with(str(loans[0].id))
     else:
         raise pytest.fail("Test failed due to error not being caught")
 
@@ -242,9 +259,11 @@ async def test_create_loan(mock_create_loan):
     """
     mock_create_loan.return_value = loans[1]
 
+    user_id = uuid4()
+
     result = await loan_route.create_loan(
         CreateLoanRequest(
-            loans[1].user_id,
+            user_id,
             loans[1].amount,
             loans[1].annual_interest_rate,
             loans[1].loan_term,
@@ -255,11 +274,11 @@ async def test_create_loan(mock_create_loan):
 
     mock_create_loan.assert_called_once_with(
         Attrs(
-            user_id=loans[1].user_id,
             amount=loans[1].amount,
             annual_interest_rate=loans[1].annual_interest_rate,
             loan_term=loans[1].loan_term,
-        )
+        ),
+        user_id,
     )
 
     assert result == loans[1]
@@ -298,14 +317,16 @@ async def test_create_loan_invalid_amount(mock_create_loan):
     """
     mock_create_loan.return_value = loans[1]
 
+    user_id = uuid4()
+
     try:
         await loan_route.create_loan(
             CreateLoanRequest(
-                loans[1].user_id,
+                user_id,
                 0,
                 loans[1].annual_interest_rate,
                 loans[1].loan_term,
-            )
+            ),
         )
     except ValidationError as e:
         errors = e.errors()

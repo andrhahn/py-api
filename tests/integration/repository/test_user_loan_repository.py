@@ -28,8 +28,8 @@ def fixture_user_loans():
 
     user_loans = [
         user_loan_repository.create(UserLoan(uuid4(), user1_id, loan1_id, True)),
-        user_loan_repository.create(UserLoan(uuid4(), user2_id, loan2_id, True)),
-        user_loan_repository.create(UserLoan(uuid4(), user2_id, loan1_id, False)),
+        user_loan_repository.create(UserLoan(uuid4(), user1_id, loan2_id, True)),
+        user_loan_repository.create(UserLoan(uuid4(), user2_id, loan2_id, False)),
     ]
 
     yield user_loans
@@ -40,9 +40,9 @@ def fixture_user_loans():
 
 
 @pytest.mark.asyncio
-async def test_get_user_loans(user_loans):
+async def test_find(user_loans):
     """
-    Get user loans test
+    Find test
     """
 
     result = user_loan_repository.find()
@@ -51,9 +51,9 @@ async def test_get_user_loans(user_loans):
 
 
 @pytest.mark.asyncio
-async def test_get_user_loan_by_id(user_loans):
+async def test_find_one(user_loans):
     """
-    Get user loan by id test
+    Find one test
     """
 
     result = user_loan_repository.find_one(str(user_loans[0].id))
@@ -62,14 +62,37 @@ async def test_get_user_loan_by_id(user_loans):
 
 
 @pytest.mark.asyncio
-async def test_get_user_loan_by_id_not_found():
+async def test_find_one_not_found():
     """
-    Get user loan by id not found test
+    Find one not found test
     """
 
     result = user_loan_repository.find_one(str(uuid4()))
 
     assert result is None
+
+
+@pytest.mark.asyncio
+async def test_find_by_user_id(user_loans):
+    """
+    Find by user id test
+    """
+
+    result = user_loan_repository.find_by_user_id(str(user_loans[0].user_id))
+
+    assert len(result) == 2
+    assert result[0].user_id == user_loans[0].user_id
+
+
+@pytest.mark.asyncio
+async def test_find_by_user_id_not_found():
+    """
+    Find by user id not found test
+    """
+
+    result = user_loan_repository.find_by_user_id(str(uuid4()))
+
+    assert result == []
 
 
 @pytest.mark.asyncio
