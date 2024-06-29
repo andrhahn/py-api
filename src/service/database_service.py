@@ -5,9 +5,9 @@ Database service
 from sqlmodel import Session, SQLModel, create_engine
 
 
-_engine = create_engine("sqlite://", echo=True)
+engine = create_engine("sqlite://", echo=True)
 
-SQLModel.metadata.create_all(_engine)
+SQLModel.metadata.create_all(engine)
 
 print("Successfully connected to database")
 
@@ -19,4 +19,4 @@ def get_session() -> Session:
 
     print("Creating database session")
 
-    return Session(_engine)
+    return Session(engine)

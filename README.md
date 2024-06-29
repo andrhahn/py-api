@@ -18,13 +18,10 @@ Python API
     # start
     uvicorn src.main:app --reload
 
-    # docker
-    docker-compose up
-
     # docs
     http://127.0.0.1:8000/docs
 
-    # unit tests
+    # test
     pytest tests
 
     # format
@@ -32,6 +29,9 @@ Python API
 
     # lint
     pylint src tests
+
+    # docker
+    docker-compose up
 
 ### License
 
