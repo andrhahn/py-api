@@ -2,7 +2,6 @@
 Loan service
 """
 
-from amortization.schedule import amortization_schedule as amort_sched
 from src.model.loan import Loan, AmortizationSchedule, LoanSchedule, LoanSummary
 from src.repository import loan_repository
 from src.service import user_loan_service
@@ -73,8 +72,6 @@ async def retrieve_loan_summary(id_: str, month: int) -> LoanSummary | None:
             loan.amount, loan.annual_interest_rate, loan.loan_term
         )
 
-        print(amortization_schedule)
-
         principle_balance = 0
         interest_paid = 0
         principle_paid = 0
@@ -89,9 +86,9 @@ async def retrieve_loan_summary(id_: str, month: int) -> LoanSummary | None:
 
         result = LoanSummary(
             id_,
-            f"{principle_balance:.2f}",
-            f"{principle_paid:.2f}",
-            f"{interest_paid:.2f}",
+            round(principle_balance, 2),
+            round(principle_paid, 2),
+            round(interest_paid, 2),
         )
 
     return result
@@ -128,11 +125,37 @@ async def calculate_amortization_schedule(
 
     result = []
 
-    for number, amount, interest, principal, balance in amort_sched(
-        amount_, annual_interest_rate_, loan_term_
-    ):
+    monthly_interest_rate = annual_interest_rate_ / 100 / 12
+
+    total_payments = loan_term_
+
+    monthly_payment = (
+        amount_
+        * (monthly_interest_rate * (1 + monthly_interest_rate) ** total_payments)
+        / ((1 + monthly_interest_rate) ** total_payments - 1)
+    )
+
+    principal_remaining = amount_
+
+    for payment_number in range(1, total_payments + 1):
+        interest_payment = principal_remaining * monthly_interest_rate
+
+        if payment_number == total_payments:
+            principal_payment = principal_remaining
+        else:
+            principal_payment = monthly_payment - interest_payment
+
+        principal_remaining -= principal_payment
+
         result.append(
-            AmortizationSchedule(None, number, amount, interest, principal, balance)
+            AmortizationSchedule(
+                None,
+                payment_number,
+                round(monthly_payment, 2),
+                round(interest_payment, 2),
+                round(principal_payment, 2),
+                round(principal_remaining, 2),
+            )
         )
 
     return result

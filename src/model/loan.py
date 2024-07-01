@@ -48,9 +48,9 @@ class LoanSummary(BaseModel):
     LoanSummary model
     """
 
-    principle_balance: float = Field(gt=0)
-    principle_paid: float = Field(gt=0)
-    interest_paid: float = Field(gt=0)
+    principle_balance: float = Field(ge=0)
+    principle_paid: float = Field(ge=0)
+    interest_paid: float = Field(ge=0)
 
     def __init__(self, _id, principle_balance, principle_paid, interest_paid):
         super().__init__(

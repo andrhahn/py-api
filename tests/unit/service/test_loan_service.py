@@ -34,28 +34,45 @@ async def test_retrieve_loan_schedule(mock_retrieve_loan_by_id):
 
     assert len(result) == 6
     assert result[0].month == 1
-    assert result[0].remaining_balance == 836.77
-    assert result[0].monthly_payment == 171.56
+    assert result[0].remaining_balance == 833.37
+    assert result[0].monthly_payment == 166.72
 
     assert result[1].month == 2
-    assert result[1].remaining_balance == 672.18
-    assert result[1].monthly_payment == 171.56
+    assert result[1].remaining_balance == 666.72
+    assert result[1].monthly_payment == 166.72
 
     assert result[2].month == 3
-    assert result[2].remaining_balance == 506.22
-    assert result[2].monthly_payment == 171.56
+    assert result[2].remaining_balance == 500.06
+    assert result[2].monthly_payment == 166.72
 
     assert result[3].month == 4
-    assert result[3].remaining_balance == 338.88
-    assert result[3].monthly_payment == 171.56
+    assert result[3].remaining_balance == 333.39
+    assert result[3].monthly_payment == 166.72
 
     assert result[4].month == 5
-    assert result[4].remaining_balance == 170.14
-    assert result[4].monthly_payment == 171.56
+    assert result[4].remaining_balance == 166.7
+    assert result[4].monthly_payment == 166.72
 
     assert result[5].month == 6
     assert result[5].remaining_balance == 0
-    assert result[5].monthly_payment == 171.56
+    assert result[5].monthly_payment == 166.72
+
+
+@pytest.mark.asyncio
+async def test_retrieve_loan_summary(mock_retrieve_loan_by_id):
+    """
+    Retrieve loan summary test
+    """
+
+    loan = Loan(uuid4(), 1000, 0.1, 6)
+
+    mock_retrieve_loan_by_id.return_value = loan
+
+    result = await loan_service.retrieve_loan_summary(str(loan.id), 3)
+
+    assert result.principle_balance == 500.06
+    assert result.principle_paid == 499.94
+    assert result.interest_paid == 0.21
 
 
 @pytest.mark.asyncio
