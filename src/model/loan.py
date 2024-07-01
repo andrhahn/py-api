@@ -92,3 +92,24 @@ class ShareLoanRequest(BaseModel):
             loan_id=loan_id,
             user_id=user_id,
         )
+
+
+class AmortizationSchedule(BaseModel):
+    """
+    AmortizationSchedule model
+    """
+
+    month: int = Field(gt=0, le=60)
+    amount: float = Field(gt=0)
+    interest: float = Field(gt=0)
+    principle: float = Field(gt=0)
+    balance: float = Field(ge=0)
+
+    def __init__(self, _id, month, amount, interest, principle, balance):
+        super().__init__(
+            month=month,
+            amount=amount,
+            interest=interest,
+            principle=principle,
+            balance=balance,
+        )

@@ -32,7 +32,39 @@ async def test_retrieve_loan_schedule(mock_retrieve_loan_by_id):
 
     result = await loan_service.retrieve_loan_schedule(str(loan.id))
 
-    print(result)
+    assert len(result) == 6
+    assert result[0].month == 1
+    assert result[0].remaining_balance == 836.77
+    assert result[0].monthly_payment == 171.56
+
+    assert result[1].month == 2
+    assert result[1].remaining_balance == 672.18
+    assert result[1].monthly_payment == 171.56
+
+    assert result[2].month == 3
+    assert result[2].remaining_balance == 506.22
+    assert result[2].monthly_payment == 171.56
+
+    assert result[3].month == 4
+    assert result[3].remaining_balance == 338.88
+    assert result[3].monthly_payment == 171.56
+
+    assert result[4].month == 5
+    assert result[4].remaining_balance == 170.14
+    assert result[4].monthly_payment == 171.56
+
+    assert result[5].month == 6
+    assert result[5].remaining_balance == 0
+    assert result[5].monthly_payment == 171.56
+
+
+@pytest.mark.asyncio
+async def calculate_amortization_schedule():
+    """
+    Calculate loan amortization schedule test
+    """
+
+    result = await loan_service.calculate_amortization_schedule(1000, 0.1, 6)
 
     assert len(result) == 6
     assert result[0].month == 1
