@@ -1,0 +1,218 @@
+version: 2
+
+references:
+  container_config: &container_config
+    docker:
+      - image: cimg/python:3.12.4
+
+    working_directory: ~/repo
+
+  workspace_root: &workspace_root
+                    .
+
+jobs:
+  checkout:
+    <<: *container_config
+
+    steps:
+      - run: echo ${CIRCLE_BRANCH}
+
+      - checkout
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - .
+
+  build:
+    <<: *container_config
+
+    steps:
+      - attach_workspace:
+          at: *workspace_root
+
+      - restore_cache:
+          keys:
+            - requirements-v1-{{ checksum "requirements.txt" }}
+            - requirements-v1-
+
+      - run: pip install -r requirements.txt
+
+      - save_cache:
+          key: requirements-v1-{{ checksum "requirements.txt" }}
+          paths:
+            - lib
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - .
+
+  test:
+    <<: *container_config
+
+    steps:
+      - attach_workspace:
+          at: *workspace_root
+
+      - restore_cache:
+          keys:
+            - requirements-v1-{{ checksum "requirements.txt" }}
+            - requirements-v1-
+
+      - run: curl -O http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb
+
+      - run: sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb
+
+      - run: python -m pytest
+
+  deploy_dev:
+    <<: *container_config
+
+    steps:
+      - attach_workspace:
+          at: *workspace_root
+
+      - setup_remote_docker
+
+      - run: docker login --username=_ --password=${HEROKU_AUTH_TOKEN} registry.heroku.com
+
+      - run: docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t registry.heroku.com/${HEROKU_APP_NAME}-dev/web .
+
+      - run: docker push registry.heroku.com/${HEROKU_APP_NAME}-dev/web
+
+      - run:
+          command: |
+            HEROKU_IMAGE_ID=$(docker inspect registry.heroku.com/${HEROKU_APP_NAME}-dev/web --format={{.Id}})
+
+            curl -f -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME-dev/formation \
+            -d '{"updates": [{"type": "web", "docker_image": "'"$HEROKU_IMAGE_ID"'"}]}' \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
+            -H "Authorization: Bearer ${HEROKU_API_KEY}"
+
+  deploy_stage:
+    <<: *container_config
+
+    steps:
+      - attach_workspace:
+          at: *workspace_root
+
+      - setup_remote_docker
+
+      - run: docker login --username=_ --password=${HEROKU_AUTH_TOKEN} registry.heroku.com
+
+      - run: docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t registry.heroku.com/${HEROKU_APP_NAME}-stage/web .
+
+      - run: docker push registry.heroku.com/${HEROKU_APP_NAME}-stage/web
+
+      - run:
+          command: |
+            HEROKU_IMAGE_ID=$(docker inspect registry.heroku.com/${HEROKU_APP_NAME}-stage/web --format={{.Id}})
+
+            curl -f -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME-stage/formation \
+            -d '{"updates": [{"type": "web", "docker_image": "'"$HEROKU_IMAGE_ID"'"}]}' \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
+            -H "Authorization: Bearer ${HEROKU_API_KEY}"
+
+  deploy_prod:
+    <<: *container_config
+
+    steps:
+      - attach_workspace:
+          at: *workspace_root
+
+      - setup_remote_docker
+
+      - run: docker login --username=_ --password=${HEROKU_AUTH_TOKEN} registry.heroku.com
+
+      - run: docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t registry.heroku.com/${HEROKU_APP_NAME}-prod/web .
+
+      - run: docker push registry.heroku.com/${HEROKU_APP_NAME}-prod/web
+
+      - run:
+          command: |
+            HEROKU_IMAGE_ID=$(docker inspect registry.heroku.com/${HEROKU_APP_NAME}-prod/web --format={{.Id}})
+
+            curl -f -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME-prod/formation \
+            -d '{"updates": [{"type": "web", "docker_image": "'"$HEROKU_IMAGE_ID"'"}]}' \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
+            -H "Authorization: Bearer ${HEROKU_API_KEY}"
+
+workflows:
+  version: 2
+
+  build_test_deploy_dev:
+    jobs:
+      - checkout
+
+      - build:
+          requires:
+            - checkout
+
+      - test:
+          requires:
+            - build
+
+      - deploy_dev:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
+
+  build_deploy_stage:
+    jobs:
+      - checkout:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - build:
+          requires:
+            - checkout
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - deploy_stage:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+  build_deploy_prod:
+    jobs:
+      - checkout:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^rel-.*/
+
+      - build:
+          requires:
+            - checkout
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^rel-.*/
+
+      - deploy_prod:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^rel-.*/
+            branches:
+              ignore: /.*/
