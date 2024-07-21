@@ -3,9 +3,8 @@ python-dotenv==1.0.1
 sqlmodel==0.0.19
 uvicorn==0.30.1
 
-black==24.4.2
 callee==0.3.1
-pylint==3.2.3
 pytest==8.2.2
 pytest-asyncio==0.23.7
 pytest-mock==3.14.0
+ruff==0.5.4

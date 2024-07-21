@@ -4,7 +4,7 @@ Database service
 
 import logging as logger
 from sqlmodel import Session, SQLModel, create_engine
-from src.model import user, loan, user_loan  # pylint: disable=unused-import
+from src.model import user, loan, user_loan  # noqa: F401
 
 
 ENGINE = None

@@ -25,10 +25,10 @@ Python API
     pytest tests
 
     # format
-    black src tests
+    ruff format
 
     # lint
-    pylint src tests
+    ruff check
 
     # docker
     docker-compose up
