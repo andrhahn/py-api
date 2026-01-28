@@ -31,7 +31,7 @@ Python API
     ruff check
 
     # docker
-    docker-compose up
+    docker compose up
 
     # docs
     http://127.0.0.1:8000/docs
