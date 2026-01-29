@@ -49,7 +49,7 @@ async def test_find_one(user_loans):
     Find one test
     """
 
-    result = user_loan_repository.find_one(str(user_loans[0].id))
+    result = user_loan_repository.find_one(user_loans[0].id)
 
     assert result.id == user_loans[0].id
 
@@ -60,7 +60,7 @@ async def test_find_one_not_found():
     Find one not found test
     """
 
-    result = user_loan_repository.find_one(str(uuid4()))
+    result = user_loan_repository.find_one(uuid4())
 
     assert result is None
 
@@ -71,7 +71,7 @@ async def test_find_by_user_id(user_loans):
     Find by user id test
     """
 
-    result = user_loan_repository.find_by_user_id(str(user_loans[0].user_id))
+    result = user_loan_repository.find_by_user_id(user_loans[0].user_id)
 
     assert len(result) == 2
     assert result[0].user_id == user_loans[0].user_id
@@ -83,7 +83,7 @@ async def test_find_by_user_id_not_found():
     Find by user id not found test
     """
 
-    result = user_loan_repository.find_by_user_id(str(uuid4()))
+    result = user_loan_repository.find_by_user_id(uuid4())
 
     assert result == []
 

@@ -44,7 +44,7 @@ async def test_find_one(loans):
     Find one test
     """
 
-    result = loan_repository.find_one(str(loans[0].id))
+    result = loan_repository.find_one(loans[0].id)
 
     assert result.amount == loans[0].amount
 
@@ -55,7 +55,7 @@ async def test_find_one_not_found():
     Find one not found test
     """
 
-    result = loan_repository.find_one(str(uuid4()))
+    result = loan_repository.find_one(uuid4())
 
     assert result is None
 

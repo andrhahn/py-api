@@ -2,6 +2,8 @@
 User repository
 """
 
+from uuid import UUID
+
 from sqlmodel import select
 from src.service import database_service
 from src.model.user import User
@@ -20,7 +22,7 @@ def find() -> [User]:
         return results.all()
 
 
-def find_one(id_: str) -> User | None:
+def find_one(id_: UUID) -> User | None:
     """
     Retrieve user by id
     """

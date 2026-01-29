@@ -2,6 +2,8 @@
 Loan service
 """
 
+from uuid import UUID
+
 from src.model.loan import Loan, AmortizationSchedule, LoanSchedule, LoanSummary
 from src.repository import loan_repository
 from src.service import user_loan_service
@@ -21,7 +23,9 @@ async def retrieve_loans_by_user_id(user_id: str) -> [Loan]:
     Retrieve all loans by user id
     """
 
-    user_loans = await user_loan_service.retrieve_user_loans_by_user_id(user_id)
+    user_loans = await user_loan_service.retrieve_user_loans_by_user_id(
+        UUID(str(user_id), version=4)
+    )
 
     return loan_repository.find_by_ids([user_loan.loan_id for user_loan in user_loans])
 
@@ -31,7 +35,7 @@ async def retrieve_loan_by_id(id_: str) -> Loan | None:
     Retrieve loan by id
     """
 
-    return loan_repository.find_one(id_)
+    return loan_repository.find_one(UUID(str(id_), version=4))
 
 
 async def retrieve_loan_schedule(id_: str) -> [LoanSchedule]:
@@ -152,7 +156,7 @@ async def calculate_amortization_schedule(
                 None,
                 payment_number,
                 round(monthly_payment, 2),
-                round(interest_payment, 2),
+                round(interest_payment, 6),
                 round(principal_payment, 2),
                 round(principal_remaining, 2),
             )

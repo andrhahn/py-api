@@ -46,7 +46,7 @@ async def test_find_one(users):
     Find one test
     """
 
-    result = user_repository.find_one(str(users[0].id))
+    result = user_repository.find_one(users[0].id)
 
     assert result.name == users[0].name
 
@@ -57,7 +57,7 @@ async def test_find_one_not_found():
     Find one not found test
     """
 
-    result = user_repository.find_one(str(uuid4()))
+    result = user_repository.find_one(uuid4())
 
     assert result is None
 

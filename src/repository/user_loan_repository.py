@@ -2,6 +2,8 @@
 UserLoan repository
 """
 
+from uuid import UUID
+
 from sqlmodel import select
 from src.service import database_service
 from src.model.user_loan import UserLoan
@@ -20,7 +22,7 @@ def find() -> [UserLoan]:
         return results.all()
 
 
-def find_one(id_: str) -> UserLoan | None:
+def find_one(id_: UUID) -> UserLoan | None:
     """
     Retrieve user loan by id
     """
@@ -29,7 +31,7 @@ def find_one(id_: str) -> UserLoan | None:
         return session.get(UserLoan, id_)
 
 
-def find_by_user_id(user_id: str) -> [UserLoan]:
+def find_by_user_id(user_id: UUID) -> [UserLoan]:
     """
     Retrieve all user loans by user id
     """

@@ -101,7 +101,7 @@ class AmortizationSchedule(BaseModel):
 
     month: int = Field(gt=0, le=60)
     amount: float = Field(gt=0)
-    interest: float = Field(gt=0)
+    interest: float = Field(ge=0)
     principle: float = Field(gt=0)
     balance: float = Field(ge=0)
 
