@@ -29,6 +29,7 @@ The codebase is organized into distinct layers within `src/`:
     git clone https://github.com/scranth/py-api.git
 
     # install python
+    pyenv install 3.12.4
     pyenv local 3.12.4
     pyenv exec python -m venv .venv
     source .venv/bin/activate  (mac)
